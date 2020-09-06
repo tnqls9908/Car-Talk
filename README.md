@@ -16,5 +16,5 @@
 - [X] 라즈베리 파이 BLE mode를 adverting mode로 설정
 - [X] 라즈베리 파이 간의 Scanning
 
-#### 9월 10일
+#### 9월 11일
 - [ ] 라즈베리 파이 간의 adverting mode로 신호보내고 받기
