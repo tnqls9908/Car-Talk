@@ -154,4 +154,4 @@ def parse_events(sock, loop_count=100):
                     else:
                         results.append(b)
     sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, old_filter )
-    return results
+    return results 
