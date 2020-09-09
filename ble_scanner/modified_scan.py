@@ -15,9 +15,7 @@ for dev in devices:
     b_check = False
     for check in dev.getScanData():
         if(check[1] == 'Manufacturer'):
-            print(check[2][:4])
-            b = str(check[2][:4])
-            if(b == '4c00'):
+            if(str(check[2][:4]) == '4c00' and str(check[-2:]) == '00'):
                 b_check = True
                 break  
     if(b_check==False):
