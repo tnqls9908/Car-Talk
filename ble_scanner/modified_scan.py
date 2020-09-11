@@ -8,22 +8,27 @@ class ScanDelegate(DefaultDelegate):
         elif isNewData:
             print("Received new data from %s", dev.addr)
 
-scanner = Scanner().withDelegate(ScanDelegate())
-devices = scanner.scan(10.0)
+while(True):
+    scanner = Scanner().withDelegate(ScanDelegate())
+    devices = scanner.scan(1.0)
+    for dev in devices:
+        b_check = False
+        for check in dev.getScanData():
+            if(check[1] == 'Manufacturer'):
+                c = str(check[2][:4])
+                e = str(check[2][-2:])
+                if(c == '4c00' and e == 'c8'):
+                    print('right') 
+                    b_check = True
+                    break  
 
-for dev in devices:
-    b_check = False
-    for check in dev.getScanData():
-        if(check[1] == 'Manufacturer'):
-            if(str(check[2][:4]) == '4c00' and str(check[-2:]) == '00'):
-                b_check = True
-                break  
-    if(b_check==False):
-        continue
-    print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
-    for (adtype, desc, value) in dev.getScanData():
-        print("  %s = %s" % (desc, value))
-
+        if(b_check==False):
+            print(dev.addr,'not')
+            continue
+        print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
+        for (adtype, desc, value) in dev.getScanData():
+            if(desc == 'Manufacturer'):
+                print("  %s = company: %s distance: %s data: %s major: %s minor: %s tx: %s" % (desc, value[:4], value[4:8], value[8:40], value[40:44], value[44:48], value[48:]))
 
 
 """
