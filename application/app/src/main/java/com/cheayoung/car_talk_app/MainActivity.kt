@@ -18,38 +18,26 @@ import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
-
-class MainActivity : AppCompatActivity() {
-    // Tag name for Log message
-    val TAG = "Central"
-
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP) class MainActivity : AppCompatActivity() {
     // used to identify adding bluetooth names
     val REQUEST_ENABLE_BT = 1
     val REQUEST_FINE_LOCATION = 2
-
     // scan period in milliseconds
     val SCAN_PERIOD = 5000
-
     // ble adapter
-    lateinit var ble_adapter: BluetoothAdapter
-
+    var ble_adapter: BluetoothAdapter? = null
+    var ble_scanner_: BluetoothLeScanner? = null
     // flag for scanning
     var is_scanning_ = false
-
     // flag for connection
     var connected_ = false
-
     // scan results
-    lateinit var scan_results_: Map<String?, BluetoothDevice?>
-
+    var scan_results_: Map<String, BluetoothDevice>? = null
     // scan callback
-    lateinit var scan_cb_: ScanCallback
-
-    // ble scanner
-    lateinit var ble_scanner_: BluetoothLeScanner
-
+    var scan_cb_: ScanCallback? = null
+    var check: BLEScanCallback? = null
     // scan handler
-    lateinit var scan_handler_: Handler
+    var scan_handler_: Handler? = null
 
     //scan 필터 이와같은 정보를 가진 것들만 스캔한다.
     val SERVICE_STRING = "0000aab0-f845-40fa-995d-658a43feea4c"
@@ -60,43 +48,44 @@ class MainActivity : AppCompatActivity() {
     val UUID_CTRL_RESPONSE: UUID = UUID.fromString(CHARACTERISTIC_RESPONSE_STRING)
     val MAC_ADDR = "78:A5:04:58:A7:92"
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         //// set click event handler
         // ble manager
 
-        // ble manager
         val ble_manager: BluetoothManager
         ble_manager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         // set ble adapter
-        // set ble adapter
         ble_adapter = ble_manager.adapter
+        mode_start_button.setOnClickListener { startScan() }
 
+        two_move.setOnClickListener {
+            val intent = Intent(this, TwoActivity::class.java)// 다음 화면으로 이동
+            startActivity(intent)
+            finish()
+        }
     }
 
-
-    // ble manager, BLE 사용하기 위한 기본 설정
-
-
-    // ble 스캔 시작하는 함수
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun startScan() {
+    private fun startScan() {
         tv_status_.setText("Scanning...")
         // check ble adapter and ble enabled
-        if (ble_adapter == null || !ble_adapter.isEnabled()) {
+        if (ble_adapter == null || ble_adapter!!.isEnabled()) {
             // request BLE enable
             val ble_enable_intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(ble_enable_intent, REQUEST_ENABLE_BT)
+            startActivityForResult(
+                ble_enable_intent,
+                REQUEST_ENABLE_BT
+            )
             tv_status_.setText("Scanning Failed: ble not enabled")
             return
         }
         // check if location permission
         if (ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) !== PackageManager.PERMISSION_GRANTED) {
             // Request Fine Location permission
             ActivityCompat.requestPermissions(
@@ -110,7 +99,6 @@ class MainActivity : AppCompatActivity() {
         //// set scan filters
         // create scan filter list
         val filters: MutableList<ScanFilter> = ArrayList()
-        // create a scan filter with device mac address
         // create a scan filter with device mac address
         val scan_filter = ScanFilter.Builder()
             .setDeviceAddress(MAC_ADDR)
@@ -126,53 +114,59 @@ class MainActivity : AppCompatActivity() {
 
         scan_results_ = HashMap()
         scan_cb_ = BLEScanCallback(scan_results_)
-
-
+        tv_status_.setText((scan_cb_ as BLEScanCallback).sendResult())
 
         //// now ready to scan
         // start scan
-        ble_scanner_.startScan(filters, settings, scan_cb_);
+        //ble_scanner_?.startScan(filters, settings, scan_cb_);
+        ble_scanner_?.startScan(scan_cb_);
         // set scanning flag
-        is_scanning_= true;
-
+        is_scanning_ = true;
     }
-    class BLEScanCallback internal constructor(_scan_results: Map<String?, BluetoothDevice?>) : ScanCallback()
-    {
-        private val cb_scan_results_: Map<String, BluetoothDevice>
-        fun onScanResult(_callback_type: Int, _result: ScanResult) {
+
+    class BLEScanCallback(scan_results: Map<String, BluetoothDevice>?) : ScanCallback() {
+        private val cb_scan_results_: Map<String, BluetoothDevice>?
+        private var text : String? = null
+        // Tag name for Log message
+        val TAG = "Central"
+        init {
+            cb_scan_results_ = scan_results
+        }
+
+        override fun onScanResult(_callback_type: Int, _result: ScanResult) {
             Log.d(TAG, "onScanResult")
             addScanResult(_result)
         }
 
-        fun onBatchScanResults(_results: List<ScanResult>) {
+        override fun onBatchScanResults(_results: List<ScanResult>) {
             for (result in _results) {
                 addScanResult(result)
+                sendResult()
             }
         }
 
-        fun onScanFailed(_error: Int) {
+        override fun onScanFailed(_error: Int) {
             Log.e(TAG, "BLE scan failed with code $_error")
         }
-
-        /*
-        Add scan result
-         */
+        // Add scan result
         private fun addScanResult(_result: ScanResult) {
             // get scanned device
             val device: BluetoothDevice = _result.getDevice()
             // get scanned device MAC address
             val device_address: String = device.getAddress()
             // add the device to the result list
-            cb_scan_results_.put(device_address, device)
+            cb_scan_results_?.plus(Pair(device_address, device))//cb_scan_results_.(device_address, device)
             // log
             Log.d(TAG, "scan results device: $device")
-            tv_status_.setText("add scanned device: $device_address")
+            text =  "add scanned device: $device_address"
         }
 
-        init {
-            cb_scan_results_ = _scan_results
+        fun sendResult(): String? {
+            return text
+
         }
     }
+
     // BLE 지원확인하는 함수수
     override fun onResume() {
         super.onResume()
