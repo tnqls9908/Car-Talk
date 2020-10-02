@@ -43,6 +43,7 @@ class BeaconAdapter(beacons: Vector<Beacon>?, layoutInflater: LayoutInflater) :
             beaconHolder.address = convertView.findViewById(R.id.address)
             beaconHolder.rssi = convertView.findViewById(R.id.rssi)
             beaconHolder.time = convertView.findViewById(R.id.time)
+            beaconHolder.uuid = convertView.findViewById(R.id.uuid)
             convertView.setTag(beaconHolder)
         } else {
             beaconHolder = convertView.getTag() as BeaconHolder
@@ -50,6 +51,11 @@ class BeaconAdapter(beacons: Vector<Beacon>?, layoutInflater: LayoutInflater) :
         beaconHolder.time?.setText("시간 :" + beacons.get(position).now)
         beaconHolder.address?.setText("MAC Addr :" + beacons.get(position).address)
         beaconHolder.rssi?.setText("RSSI :" + beacons.get(position).rssi.toString() + "dBm")
+        val change = beacons.get(position).uuid.toString()
+        // 시작과 끝을 다 포함
+        var ran = IntRange(change.indexOf("mManufacturerSpecificData"), change.indexOf("mServiceData")-1)
+        //beaconHolder.uuid?.setText("UUID :" + change+"//"+change.indexOf("mManufacturerSpecificData") +"//"+change.indexOf("mServiceData") )
+        beaconHolder.uuid?.setText("UUID :" + change.slice(ran) )
         return convertView
     }
 
@@ -57,6 +63,7 @@ class BeaconAdapter(beacons: Vector<Beacon>?, layoutInflater: LayoutInflater) :
         var address: TextView? = null
         var rssi: TextView? = null
         var time: TextView? = null
+        var uuid: TextView? = null
     }
 
 

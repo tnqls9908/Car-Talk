@@ -11,7 +11,7 @@ try:
     while True:
         if GPIO.input(GREEN)==1:
             print ("Green Button was Pressed!" )
-        elif GPIO.input(RED)==1:
+        elif GPIO.input(RED)==1:     
             print ("Red Button was Pressed!" )  
         elif GPIO.input(YELLOW)==1:
             print ("Yellow Button was Pressed!" )                                                                                       

@@ -78,16 +78,19 @@ class TwoActivity : AppCompatActivity() {
                             + "\n" + result.getDevice().getBondState() + "\n" + result.getDevice()
                         .getType()
                 )
+                scanRecord!!.getServiceUuids()
                 val scanResult: ScanResult = result
+                // 4c 00 이후부터 뒤에 00 전까지 mManufacturerSpecificData
+
                 Thread {
                     runOnUiThread {
                         beacon!!.add(
                             0,
                             Beacon(
-
                                 scanResult.getDevice().getAddress(),
                                 scanResult.getRssi(),
-                                simpleDateFormat.format(Date())
+                                simpleDateFormat.format(Date()),
+                                scanRecord!!
                             )
                         )
                         beaconAdapter = BeaconAdapter(beacon, layoutInflater)
