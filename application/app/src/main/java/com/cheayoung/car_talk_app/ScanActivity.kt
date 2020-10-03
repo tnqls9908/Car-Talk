@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.*
 import android.os.Build
 import android.os.Bundle
+import android.os.ParcelUuid
 import android.util.Log
 import android.widget.ListView
 import androidx.annotation.RequiresApi
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class TwoActivity : AppCompatActivity() {
@@ -64,6 +66,14 @@ class TwoActivity : AppCompatActivity() {
         돼요.*/
     }
 
+    private fun buildAdvertiseData(): AdvertiseData {
+        val dataBuilder: AdvertiseData.Builder = AdvertiseData.Builder()
+        //Define a service UUID according to your needs
+        dataBuilder.addServiceUuid(ParcelUuid(UUID(0x123abcL, -1L)))
+        dataBuilder.setIncludeDeviceName(true)
+        return dataBuilder.build()
+    }
+
     var mScanCallback: ScanCallback = object : ScanCallback() {
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -81,7 +91,6 @@ class TwoActivity : AppCompatActivity() {
                 scanRecord!!.getServiceUuids()
                 val scanResult: ScanResult = result
                 // 4c 00 이후부터 뒤에 00 전까지 mManufacturerSpecificData
-
                 Thread {
                     runOnUiThread {
                         beacon!!.add(
@@ -93,6 +102,11 @@ class TwoActivity : AppCompatActivity() {
                                 scanRecord!!
                             )
                         )
+                        //scanResult.toString()
+                        // Adapter로 가기 전에 걸러줘야 할 것 같다.
+                        // 조건문 들어가야 되는 곳
+                        // state를 놓아서 경우마다 beacon 사용자 커스텀으로 볼 수 있도록 추가시켜주기
+                        // 알람 들어갈 함수
                         beaconAdapter = BeaconAdapter(beacon, layoutInflater)
                         beaconListView?.setAdapter(beaconAdapter)
                         beaconAdapter?.notifyDataSetChanged()
