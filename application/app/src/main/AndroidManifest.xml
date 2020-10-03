@@ -19,8 +19,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".item"></activity>
-        <activity android:name=".TwoActivity" />
+        <activity android:name=".SettingActivity"></activity>
+        <activity android:name=".item" />
+        <activity android:name=".ScanActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

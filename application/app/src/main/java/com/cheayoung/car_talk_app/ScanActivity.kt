@@ -3,6 +3,7 @@ package com.cheayoung.car_talk_app
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.*
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.ParcelUuid
@@ -11,12 +12,14 @@ import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_scan.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-class TwoActivity : AppCompatActivity() {
+class ScanActivity : AppCompatActivity() {
     var mBluetoothAdapter: BluetoothAdapter? = null
     lateinit var mBluetoothLeScanner: BluetoothLeScanner
     var mBluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
@@ -28,7 +31,7 @@ class TwoActivity : AppCompatActivity() {
     var simpleDateFormat = SimpleDateFormat("HH:mm:ss", Locale.KOREAN)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_two)
+        setContentView(R.layout.activity_scan)
         ActivityCompat.requestPermissions(
             this, arrayOf<String>(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -64,6 +67,17 @@ class TwoActivity : AppCompatActivity() {
         mBluetoothLeScanner.startScan(mScanCallback)
         var 사용하시면: 처럼
         돼요.*/
+
+        scan_stop.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)// 다음 화면으로 이동
+            startActivity(intent)
+            finish()
+        }
+
+        setting.setOnClickListener {
+            val intent = Intent(this, SettingActivity::class.java)// 다음 화면으로 이동
+            startActivity(intent)
+        }
     }
 
     private fun buildAdvertiseData(): AdvertiseData {
@@ -93,6 +107,9 @@ class TwoActivity : AppCompatActivity() {
                 // 4c 00 이후부터 뒤에 00 전까지 mManufacturerSpecificData
                 Thread {
                     runOnUiThread {
+                        /*var data = scanRecord!!.toString()
+                        var ran = IntRange(data.indexOf("mManufacturerSpecificData"), data.indexOf("mServiceData")-2)
+                        var dat = data.slice(ran)*/
                         beacon!!.add(
                             0,
                             Beacon(

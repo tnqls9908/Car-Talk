@@ -53,9 +53,9 @@ class BeaconAdapter(beacons: Vector<Beacon>?, layoutInflater: LayoutInflater) :
         beaconHolder.rssi?.setText("RSSI :" + beacons.get(position).rssi.toString() + "dBm")
         val change = beacons.get(position).uuid.toString()
         // 시작과 끝을 다 포함
-        var ran = IntRange(change.indexOf("mManufacturerSpecificData"), change.indexOf("mServiceData")-1)
-        //beaconHolder.uuid?.setText("UUID :" + change+"//"+change.indexOf("mManufacturerSpecificData") +"//"+change.indexOf("mServiceData") )
+        var ran = IntRange(change.indexOf("mManufacturerSpecificData")+27, change.indexOf("mServiceData")-4)
         beaconHolder.uuid?.setText("UUID :" + change.slice(ran) )
+        //beaconHolder.uuid?.setText("UUID :" + beacons.get(position).uuid )
         return convertView
     }
 
