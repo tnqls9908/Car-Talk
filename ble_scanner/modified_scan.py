@@ -27,6 +27,9 @@ while(True):
             continue
         print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
         for (adtype, desc, value) in dev.getScanData():
+            button_number = str(value[8:10])
+            # 조건문으로 만약에 --면 마이크 입력 --면 마이크 입력 이렇게 적기 
+            # 이 부분이 4c00 02 15 01(02, 03) 오는 부분에서 01부분
             if(desc == 'Manufacturer'):
                 print("  %s = company: %s distance: %s data: %s major: %s minor: %s tx: %s" % (desc, value[:4], value[4:8], value[8:40], value[40:44], value[44:48], value[48:]))
 
