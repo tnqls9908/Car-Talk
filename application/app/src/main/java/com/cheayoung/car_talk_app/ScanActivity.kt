@@ -12,7 +12,6 @@ import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_scan.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -107,26 +106,40 @@ class ScanActivity : AppCompatActivity() {
                 // 4c 00 이후부터 뒤에 00 전까지 mManufacturerSpecificData
                 Thread {
                     runOnUiThread {
-                        /*var data = scanRecord!!.toString()
-                        var ran = IntRange(data.indexOf("mManufacturerSpecificData"), data.indexOf("mServiceData")-2)
-                        var dat = data.slice(ran)*/
-                        beacon!!.add(
-                            0,
-                            Beacon(
-                                scanResult.getDevice().getAddress(),
-                                scanResult.getRssi(),
-                                simpleDateFormat.format(Date()),
-                                scanRecord!!
+                        val change = scanRecord!!.toString()
+                        var ran1 = IntRange(change.indexOf("mManufacturerSpecificData")+27, change.indexOf("mServiceData")-4)
+                        var uuid_data = change.slice(ran1)
+                        var data_list = uuid_data.split(",")
+
+                        var ran2 = IntRange(0, data_list[0].indexOf("=")-1)
+                        var start_data = uuid_data.slice(ran2)
+                        var end_data : String
+                        try {
+                            end_data = data_list[data_list.size - 1].slice(IntRange(1,3))
+                        }
+                        catch(e: Exception){
+                            end_data = "-1"
+                        }
+                        if(start_data == "76" && end_data == "-56" && data_list.size == 23) {
+                            beacon!!.add(
+                                0,
+                                Beacon(
+                                    scanResult.getDevice().getAddress(),
+                                    scanResult.getRssi(),
+                                    simpleDateFormat.format(Date()),
+                                    scanRecord!!
+                                )
                             )
-                        )
-                        //scanResult.toString()
-                        // Adapter로 가기 전에 걸러줘야 할 것 같다.
-                        // 조건문 들어가야 되는 곳
-                        // state를 놓아서 경우마다 beacon 사용자 커스텀으로 볼 수 있도록 추가시켜주기
-                        // 알람 들어갈 함수
-                        beaconAdapter = BeaconAdapter(beacon, layoutInflater)
-                        beaconListView?.setAdapter(beaconAdapter)
-                        beaconAdapter?.notifyDataSetChanged()
+                            // Adapter로 가기 전에 걸러줘야 할 것 같다.
+                            // 조건문 들어가야 되는 곳
+                            // state를 놓아서 경우마다 beacon 사용자 커스텀으로 볼 수 있도록 추가시켜주기
+                            // 알람 들어갈 함수
+
+                            beaconAdapter = BeaconAdapter(beacon, layoutInflater)
+                            beaconListView?.setAdapter(beaconAdapter)
+                            beaconAdapter?.notifyDataSetChanged()
+
+                        }
                     }
                 }.start()
             } catch (e: Exception) {
